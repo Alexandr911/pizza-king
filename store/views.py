@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .forms import OrderCreateForm, ProfileForm, CouponApplyForm, ReviewForm
 from .models import Cart, OrderItem, Order, Coupon,Recommendation
-from .models import Product, Promotion, Profile, Review
+from .models import Product, Promotion, Profile
+from .models import Review, Wishlist
 import stripe
 from django.conf import settings
 from django.urls import reverse
@@ -142,12 +143,17 @@ def create_order(request):
 
 
 
-# представления для отображения и редактирования профиля
+# представления для отображения и редактирования профиля + отображения избраного
 @login_required
 def profile(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
     orders = Order.objects.filter(user=request.user)
-    return render(request, 'store/profile.html', {'profile': profile, 'orders': orders})
+    wishlist = Wishlist.objects.filter(user=request.user)
+    return render(request, 'store/profile.html', {
+        'profile': profile,
+        'orders': orders,
+        'wishlist': wishlist,
+    })
 
 @login_required
 def edit_profile(request):
@@ -291,3 +297,18 @@ def generate_recommendations(user):
     # Сохраняем рекомендации
     for product in recommended_products:
         Recommendation.objects.create(user=user, product=product, score=product.avg_rating)
+
+
+# представление для добавления товара в избранное
+@login_required
+def add_to_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    Wishlist.objects.get_or_create(user=request.user, product=product)
+    return redirect('product_detail', product_id=product.id)
+
+# Удаление товаров из избранного
+@login_required
+def remove_from_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    Wishlist.objects.filter(user=request.user, product=product).delete()
+    return redirect('profile')

@@ -6,6 +6,7 @@
 <p>Preis: {{ product.price }} €</p>
 
 <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary">In den Warenkorb</a>
+<a href="{% url 'add_to_wishlist' product.id %}" class="btn btn-secondary">Zu meiner Wunschliste hinzufügen</a>
 
 <h2>Bewertungen</h2>
 {% for review in reviews %}

@@ -117,3 +117,17 @@ class Recommendation(models.Model):
 
     def __str__(self):
         return f"Recommendation for {self.user.username}: {self.product.name} (Score: {self.score})"
+
+
+# модель для избранных товаров
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')  # Один товар может быть в избранном только один раз
+
+    def __str__(self):
+        return f"{self.user.username}'s Wishlist: {self.product.name}"
+

@@ -20,6 +20,8 @@ urlpatterns = [
     path('coupon/apply/', views.coupon_apply, name='coupon_apply'),#URL для применения купона
     path('product/<int:product_id>/add_review/', views.add_review, name='add_review'),# URL для добавления отзыва
     path('product/<int:product_id>/', views.product_detail, name='product_detail'),
+    path('add_to_wishlist/<int:product_id>/', views.add_to_wishlist, name='add_to_wishlist'),#для add товара из избранного
+    path('remove_from_wishlist/<int:product_id>/', views.remove_from_wishlist, name='remove_from_wishlist'), #для удаления товара из избранного
 
 
 ]
