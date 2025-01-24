@@ -13,5 +13,9 @@ urlpatterns = [
     path('edit_profile/', views.edit_profile, name='edit_profile'), # URL для личного кабинета
     path('order/<int:order_id>/', views.order_detail, name='order_detail'), # URL для просмотра деталей заказа
     path('accounts/login/', auth_views.LoginView.as_view(template_name='store/login.html'), name='login'),
+    path('payment/process/', views.payment_process, name='payment_process'),
+    path('payment/success/', views.payment_success, name='payment_success'),
+    path('payment/cancel/', views.payment_cancel, name='payment_cancel'), #Обработка платижей
+
 
 ]

@@ -3,6 +3,10 @@ from django.contrib.auth.decorators import login_required
 from .forms import OrderCreateForm, ProfileForm
 from .models import Cart, OrderItem, Order
 from .models import Product, Promotion, Profile
+import stripe
+from django.conf import settings
+from django.urls import reverse
+
 
 
 # Create your views here.
@@ -63,7 +67,7 @@ def remove_from_cart(request, product_id):
     return redirect('view_cart')
 
 
-# представление для оформления заказа
+# представление для оформления заказа + оплата
 def create_order(request):
     if request.method == 'POST':
         form = OrderCreateForm(request.POST)
@@ -95,7 +99,8 @@ def create_order(request):
                     )
                 del request.session['cart']
 
-            return render(request, 'store/order_created.html', {'order': order})
+            request.session['order_id'] = order.id
+            return redirect('payment_process')
     else:
         form = OrderCreateForm()
     return render(request, 'store/create_order.html', {'form': form})
@@ -127,3 +132,45 @@ def edit_profile(request):
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'store/order_detail.html', {'order': order})
+
+
+# представление для обработки платежей
+stripe.api_key = settings.STRIPE_SECRET_KEY
+def payment_process(request):
+    order_id = request.session.get('order_id')
+    order = Order.objects.get(id=order_id)
+    if request.method == 'POST':
+        success_url = request.build_absolute_uri(reverse('payment_success'))
+        cancel_url = request.build_absolute_uri(reverse('payment_cancel'))
+        session_data = {
+            'payment_method_types': ['card'],
+            'line_items': [{
+                'price_data': {
+                    'currency': 'eur',
+                    'product_data': {
+                        'name': f'Order #{order.id}',
+                    },
+                    'unit_amount': int(order.get_total_cost() * 100),
+                },
+                'quantity': 1,
+            }],
+            'mode': 'payment',
+            'success_url': success_url,
+            'cancel_url': cancel_url,
+        }
+        session = stripe.checkout.Session.create(**session_data)
+        return redirect(session.url, code=303)
+    else:
+        return render(request, 'store/payment_process.html', {'order': order, 'stripe_public_key': settings.STRIPE_PUBLIC_KEY})
+
+
+# представления для успешного и отмененного платежа
+def payment_success(request):
+    order_id = request.session.get('order_id')
+    order = Order.objects.get(id=order_id)
+    order.paid = True
+    order.save()
+    return render(request, 'store/payment_success.html', {'order': order})
+
+def payment_cancel(request):
+    return render(request, 'store/payment_cancel.html')
