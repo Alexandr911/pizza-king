@@ -35,16 +35,27 @@
 
         <h2>Unsere Pizza</h2>
         <div class="list-group">
-            {% for product in products %}
-                <a href="{% url 'product_detail' product.id %}" class="list-group-item list-group-item-action">
+    {% for product in products %}
+        <a href="{% url 'product_detail' product.id %}" class="list-group-item list-group-item-action">
+            <div class="row">
+                <div class="col-md-3">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}" style="max-width: 100px;">
+                    {% else %}
+                        <img src="https://via.placeholder.com/100" class="img-fluid rounded" alt="Placeholder">
+                    {% endif %}
+                </div>
+                <div class="col-md-9">
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">{{ product.name }}</h5>
                         <small>{{ product.price }} €</small>
                     </div>
                     <p class="mb-1">{{ product.description }}</p>
-                </a>
-            {% endfor %}
-        </div>
+                </div>
+            </div>
+        </a>
+    {% endfor %}
+</div>
     </div>
 </div>
 {% endblock %}

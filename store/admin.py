@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Product, Cart, Order, OrderItem
 from .models import Profile, Promotion
+from django.utils.html import format_html
 
 # модели для администрирования
 # класс OrderItemInline для отображения товаров заказа
@@ -16,12 +17,19 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ['paid', 'created_at', 'updated_at']
     inlines = [OrderItemInline]
 
-# Настройки для отображения модели Product в админке.
+# Настройки для отображения модели Product в админке
+# изображений через административную панель
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'price', 'category']
+    list_display = ['name', 'price', 'category', 'display_image']
     list_filter = ['category']
     search_fields = ['name', 'description']
+
+    def display_image(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="50" height="50" />', obj.image.url)
+        return "No Image"
+    display_image.short_description = 'Image'
 
 # Настройки для отображения модели Cart в админке.
 @admin.register(Cart)
@@ -41,3 +49,5 @@ class PromotionAdmin(admin.ModelAdmin):
     list_display = ['title', 'start_date', 'end_date', 'active']
     list_filter = ['active']
     search_fields = ['title', 'description']
+
+

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -125,6 +126,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STRIPE_PUBLIC_KEY = 'pk_test_51QkqVNFkhv6fec7skrJpoGvPZQ7ipxRKVQvohcc95plG1pJH4avmztZYCUfjWhn30cy9r0My2fH4E4gVQL15WDXq00SueLpfNM'
 STRIPE_SECRET_KEY = 'sk_test_51QkqVNFkhv6fec7sos9gLZDTPyd5qqp25Xaexidcuy5KlzrzYSA5FDyS4RFEmAtbSHItlnmSHAi98M0XJ2RWJQ6a004I6wNhmE'
