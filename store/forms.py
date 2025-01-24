@@ -14,3 +14,7 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['phone', 'address']
+
+# форма для применения купона
+class CouponApplyForm(forms.Form):
+    code = forms.CharField(label='Gutscheincode')

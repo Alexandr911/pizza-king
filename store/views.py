@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .forms import OrderCreateForm, ProfileForm
-from .models import Cart, OrderItem, Order
+from .forms import OrderCreateForm, ProfileForm, CouponApplyForm
+from .models import Cart, OrderItem, Order, Coupon
 from .models import Product, Promotion, Profile
 import stripe
 from django.conf import settings
@@ -9,6 +9,8 @@ from django.urls import reverse
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.utils import timezone
+
 
 
 
@@ -36,7 +38,7 @@ def add_to_cart(request, product_id):
     return redirect('home')
 
 
- # представление для отображения корзины
+ # представление для отображения корзины +  учета скидок
 def view_cart(request):
     if request.user.is_authenticated:
         cart_items = Cart.objects.filter(user=request.user)
@@ -53,7 +55,19 @@ def view_cart(request):
                 'total_price': product.price * quantity,
             })
             total += product.price * quantity
-    return render(request, 'store/cart.html', {'cart_items': cart_items, 'total': total})
+
+    coupon_id = request.session.get('coupon_id')
+    coupon = None
+    if coupon_id:
+        coupon = Coupon.objects.get(id=coupon_id)
+        discount = (coupon.discount / 100) * total
+        total -= discount
+
+    return render(request, 'store/cart.html', {
+        'cart_items': cart_items,
+        'total': total,
+        'coupon': coupon,
+    })
 
 
 # представление для удаления товара из корзины
@@ -193,3 +207,22 @@ def send_order_email(order, template, subject):
         [order.email],             # Получатель (email заказчика)
         html_message=html_message,
     )
+
+
+# представление для применения купона
+def coupon_apply(request):
+    now = timezone.now()
+    form = CouponApplyForm(request.POST)
+    if form.is_valid():
+        code = form.cleaned_data['code']
+        try:
+            coupon = Coupon.objects.get(
+                code__iexact=code,
+                valid_from__lte=now,
+                valid_to__gte=now,
+                active=True
+            )
+            request.session['coupon_id'] = coupon.id
+        except Coupon.DoesNotExist:
+            request.session['coupon_id'] = None
+    return redirect('view_cart')

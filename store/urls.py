@@ -17,5 +17,6 @@ urlpatterns = [
     path('payment/success/', views.payment_success, name='payment_success'),
     path('payment/cancel/', views.payment_cancel, name='payment_cancel'), #Обработка платижей
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('coupon/apply/', views.coupon_apply, name='coupon_apply'),#URL для применения купона
 
 ]
