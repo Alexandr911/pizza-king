@@ -16,6 +16,6 @@ urlpatterns = [
     path('payment/process/', views.payment_process, name='payment_process'),
     path('payment/success/', views.payment_success, name='payment_success'),
     path('payment/cancel/', views.payment_cancel, name='payment_cancel'), #Обработка платижей
-
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
 ]

@@ -1,26 +1,43 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warenkorb</title>
-</head>
-<body>
-    <h1>Ihr Warenkorb</h1>
-    <div>
-        {% for item in cart_items %}
-            <div>
-                <h2>{{ item.product.name }}</h2>
-                <p>Menge: {{ item.quantity }}</p>
-                <p>Preis: {{ item.total_price }} €</p>
-                <!-- ссылку на оформление заказа -->
-                <a href="{% url 'create_order' %}">Zur Kasse gehen</a>
-                <!-- кнопка для удаления товара -->
-                <a href="{% url 'remove_from_cart' item.product.id %}">Entfernen</a>
-            </div>
-        {% endfor %}
-    </div>
-    <h3>Gesamtpreis: {{ total }} €</h3>
-    <a href="{% url 'home' %}">Weiter einkaufen</a>
-</body>
-</html>
+{% extends 'store/base.html' %}
+
+{% block content %}
+<h1>Ihr Warenkorb</h1>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Produkt</th>
+                <th>Menge</th>
+                <th>Preis</th>
+                <th>Gesamt</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.price }} €</td>
+                    <td>{{ item.total_price }} €</td>
+                    <td>
+                        <a href="{% url 'remove_from_cart' item.product.id %}" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3">Gesamtpreis</td>
+                <td colspan="2">{{ total }} €</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+<div class="d-flex justify-content-between">
+    <a href="{% url 'home' %}" class="btn btn-secondary">Weiter einkaufen</a>
+    <a href="{% url 'create_order' %}" class="btn btn-primary">Zur Kasse gehen</a>
+</div>
+{% endblock %}
