@@ -1,5 +1,6 @@
-from django.shortcuts import get_object_or_404, render
-from .models import Product, Cart
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import OrderCreateForm
+from .models import Product, Cart, OrderItem, Order
 
 # Create your views here.
 
@@ -56,3 +57,41 @@ def remove_from_cart(request, product_id):
             del cart[str(product_id)]
             request.session['cart'] = cart
     return redirect('view_cart')
+
+
+# представление для оформления заказа
+def create_order(request):
+    if request.method == 'POST':
+        form = OrderCreateForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            if request.user.is_authenticated:
+                order.user = request.user
+            order.save()
+
+            if request.user.is_authenticated:
+                cart_items = Cart.objects.filter(user=request.user)
+                for item in cart_items:
+                    OrderItem.objects.create(
+                        order=order,
+                        product=item.product,
+                        price=item.product.price,
+                        quantity=item.quantity,
+                    )
+                cart_items.delete()
+            else:
+                cart = request.session.get('cart', {})
+                for product_id, quantity in cart.items():
+                    product = Product.objects.get(id=product_id)
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        price=product.price,
+                        quantity=quantity,
+                    )
+                del request.session['cart']
+
+            return render(request, 'store/order_created.html', {'order': order})
+    else:
+        form = OrderCreateForm()
+    return render(request, 'store/create_order.html', {'form': form})

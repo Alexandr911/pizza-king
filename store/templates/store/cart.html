@@ -13,6 +13,8 @@
                 <h2>{{ item.product.name }}</h2>
                 <p>Menge: {{ item.quantity }}</p>
                 <p>Preis: {{ item.total_price }} €</p>
+                <!-- ссылку на оформление заказа -->
+                <a href="{% url 'create_order' %}">Zur Kasse gehen</a>
                 <!-- кнопка для удаления товара -->
                 <a href="{% url 'remove_from_cart' item.product.id %}">Entfernen</a>
             </div>

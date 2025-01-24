@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bestellung erfolgreich</title>
+</head>
+<body>
+    <h1>Vielen Dank für Ihre Bestellung!</h1>
+    <p>Ihre Bestellnummer ist <strong>{{ order.id }}</strong>.</p>
+    <p>Wir werden Ihre Bestellung so schnell wie möglich bearbeiten.</p>
+    <a href="{% url 'home' %}">Zurück zur Startseite</a>
+</body>
+</html>
