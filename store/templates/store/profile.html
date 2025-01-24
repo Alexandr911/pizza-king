@@ -32,4 +32,20 @@
         </div>
     {% endfor %}
 </div>
+
+<h2>Zuletzt angesehene Produkte</h2>
+<div class="row">
+    {% for view in viewed_products %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ view.product.name }}</h5>
+                    <p class="card-text">{{ view.product.description }}</p>
+                    <p class="card-text">Preis: {{ view.product.price }} €</p>
+                    <a href="{% url 'product_detail' view.product.id %}" class="btn btn-primary">Details anzeigen</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
 {% endblock %}

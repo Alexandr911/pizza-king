@@ -131,3 +131,11 @@ class Wishlist(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Wishlist: {self.product.name}"
 
+# модели для истории просмотров
+class ProductView(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username if self.user else 'Anonymous'} viewed {self.product.name} at {self.viewed_at}"

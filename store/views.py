@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import OrderCreateForm, ProfileForm, CouponApplyForm, ReviewForm
 from .models import Cart, OrderItem, Order, Coupon,Recommendation
 from .models import Product, Promotion, Profile
-from .models import Review, Wishlist
+from .models import Review, Wishlist, ProductView
 import stripe
 from django.conf import settings
 from django.urls import reverse
@@ -143,16 +143,18 @@ def create_order(request):
 
 
 
-# представления для отображения и редактирования профиля + отображения избраного
+# представления для отображения и редактирования профиля + отображения избраного+ истории просмотров
 @login_required
 def profile(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
     orders = Order.objects.filter(user=request.user)
     wishlist = Wishlist.objects.filter(user=request.user)
+    viewed_products = ProductView.objects.filter(user=request.user).order_by('-viewed_at')[:10]  # Последние 10 просмотров
     return render(request, 'store/profile.html', {
         'profile': profile,
         'orders': orders,
         'wishlist': wishlist,
+        'viewed_products': viewed_products,
     })
 
 @login_required
@@ -312,3 +314,20 @@ def remove_from_wishlist(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     Wishlist.objects.filter(user=request.user, product=product).delete()
     return redirect('profile')
+
+
+# Добавление товаров в историю просмотров
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    reviews = product.reviews.all()
+
+    # Сохраняем просмотр товара
+    if request.user.is_authenticated:
+        ProductView.objects.create(user=request.user, product=product)
+    else:
+        ProductView.objects.create(product=product)
+
+    return render(request, 'store/product_detail.html', {
+        'product': product,
+        'reviews': reviews,
+    })
