@@ -8,6 +8,15 @@
 <body>
     <h1>Willkommen bei Pizza King!</h1>
     <div>
+    <h2>Aktuelle Aktionen</h2>
+    {% for promotion in promotions %}
+        <div>
+            <h3>{{ promotion.title }}</h3>
+            <p>{{ promotion.description }}</p>
+        </div>
+    {% endfor %}
+    </div>
+    <div>
         {% for product in products %}
             <div>
 

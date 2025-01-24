@@ -1,13 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .forms import OrderCreateForm, ProfileForm
-from .models import Product, Cart, OrderItem, Order, Profile
+from .models import Cart, OrderItem, Order
+from .models import Product, Promotion, Profile
+
 
 # Create your views here.
 
 def home(request):
     products = Product.objects.all()
-    return render(request, 'store/home.html', {'products': products}) #представление главной страницы
+    promotions = Promotion.objects.filter(active=True)
+    return render(request, 'store/home.html', {'products': products, 'promotions': promotions}) #представление главной страницы
 
 
 # Добавление товаров в корзину
