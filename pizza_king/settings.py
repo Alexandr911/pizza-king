@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'store',
 ]
 
@@ -136,3 +137,5 @@ EMAIL_PORT = 1025         # Порт по умолчанию для MailHog
 EMAIL_USE_TLS = False     # MailHog не использует TLS
 EMAIL_HOST_USER = ''      # Не требуется
 EMAIL_HOST_PASSWORD = ''  # Не требуется
+
+

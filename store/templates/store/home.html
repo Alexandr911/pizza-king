@@ -22,11 +22,13 @@
         <div class="list-group">
             {% for product in products %}
                 <a href="{% url 'add_to_cart' product.id %}" class="list-group-item list-group-item-action">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{ product.name }}</h5>
-                        <small>{{ product.price }} €</small>
+                    <div itemscope itemtype="http://schema.org/Product">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1" itemprop="name">{{ product.name }}</h5>
+                            <small itemprop="price">{{ product.price }} €</small>
+                        </div>
+                        <p class="mb-1" itemprop="description">{{ product.description }}</p>
                     </div>
-                    <p class="mb-1">{{ product.description }}</p>
                 </a>
             {% endfor %}
         </div>
