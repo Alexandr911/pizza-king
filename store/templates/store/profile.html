@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein Profil</title>
+</head>
+<body>
+    <h1>Mein Profil</h1>
+    <p>Telefon: {{ profile.phone }}</p>
+    <p>Adresse: {{ profile.address }}</p>
+    <a href="{% url 'edit_profile' %}">Profil bearbeiten</a>
+
+    <h2>Meine Bestellungen</h2>
+    <ul>
+        {% for order in orders %}
+            <li>
+                <a href="{% url 'order_detail' order.id %}">Bestellung #{{ order.id }}</a>
+                - {{ order.created_at }}
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import OrderCreateForm
-from .models import Product, Cart, OrderItem, Order
+from django.contrib.auth.decorators import login_required
+from .forms import OrderCreateForm, ProfileForm
+from .models import Product, Cart, OrderItem, Order, Profile
 
 # Create your views here.
 
@@ -95,3 +96,31 @@ def create_order(request):
     else:
         form = OrderCreateForm()
     return render(request, 'store/create_order.html', {'form': form})
+
+
+
+# представления для отображения и редактирования профиля
+@login_required
+def profile(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    orders = Order.objects.filter(user=request.user)
+    return render(request, 'store/profile.html', {'profile': profile, 'orders': orders})
+
+@login_required
+def edit_profile(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = ProfileForm(instance=profile)
+    return render(request, 'store/edit_profile.html', {'form': form})
+
+
+# представление для просмотра деталей заказа
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'store/order_detail.html', {'order': order})

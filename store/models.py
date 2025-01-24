@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
+
 # Модель Product
 class Product(models.Model):
     name = models.CharField(max_length=255)
@@ -57,3 +57,13 @@ class OrderItem(models.Model):
 
     def get_cost(self):
         return self.price * self.quantity
+
+
+# Mодель Profile для хранения дополнительной информации о пользователе
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return f"Profile of {self.user.username}"

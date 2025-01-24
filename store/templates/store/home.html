@@ -10,6 +10,7 @@
     <div>
         {% for product in products %}
             <div>
+
                 <h2>{{ product.name }}</h2>
                 <p>{{ product.description }}</p>
                 <p>Preis: {{ product.price }} €</p>
@@ -17,6 +18,13 @@
             </div>
         {% endfor %}
     </div>
+
+    <!-- ссылка на личный кабинет -->
+    {% if user.is_authenticated %}
+        <a href="{% url 'profile' %}">Mein Profil</a>
+    {% else %}
+        <a href="{% url 'login' %}">Anmelden</a>
+    {% endif %}
 <!-- Ссылка на корзину -->
     <a href="{% url 'view_cart' %}">Warenkorb anzeigen</a></body>
 </html>
