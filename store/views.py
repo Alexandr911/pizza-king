@@ -11,33 +11,42 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils import timezone
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, Q
 from django.core.cache import cache
 import logging
 
 
-
-
-
-
 #представление главной страницы
 def home(request):
-    products = cache.get('products')
-    if not products:
-        products = Product.objects.all()
-        cache.set('products', products, 60 * 15)  # Кэшируем на 15 минут
-
+    products = Product.objects.all()
     promotions = Promotion.objects.filter(active=True)
 
-    recommendations = []
-    if request.user.is_authenticated:
-        recommendations = Recommendation.objects.filter(user=request.user).order_by('-score')[:5]
-        logger.info(f"Recommendations for {request.user.username}: {list(recommendations)}")  # Логирование
+    # Фильтрация по категории
+    category = request.GET.get('category')
+    if category:
+        products = products.filter(category=category)
+
+    # Фильтрация по цене
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    if min_price:
+        products = products.filter(price__gte=min_price)
+    if max_price:
+        products = products.filter(price__lte=max_price)
+
+    # Сортировка
+    sort_by = request.GET.get('sort_by')
+    if sort_by == 'price_asc':
+        products = products.order_by('price')
+    elif sort_by == 'price_desc':
+        products = products.order_by('-price')
+    elif sort_by == 'popularity':
+        products = products.annotate(num_orders=Count('orderitem')).order_by('-num_orders')
 
     return render(request, 'store/home.html', {
         'products': products,
         'promotions': promotions,
-        'recommendations': recommendations,
+        'categories': Product.objects.values_list('category', flat=True).distinct(),
     })
 
 # Добавление товаров в корзину

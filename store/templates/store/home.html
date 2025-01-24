@@ -2,22 +2,37 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-8">
-        <h2>Aktuelle Aktionen</h2>
-        <div class="row">
-            {% for promotion in promotions %}
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ promotion.title }}</h5>
-                            <p class="card-text">{{ promotion.description }}</p>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+    <div class="col-md-3">
+        <h2>Filter</h2>
+        <form method="get" action="{% url 'home' %}">
+            <div class="mb-3">
+                <label for="category" class="form-label">Kategorie</label>
+                <select name="category" id="category" class="form-select">
+                    <option value="">Alle Kategorien</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}" {% if category == request.GET.category %}selected{% endif %}>{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="min_price" class="form-label">Mindestpreis</label>
+                <input type="number" name="min_price" id="min_price" class="form-control" value="{{ request.GET.min_price }}">
+            </div>
+            <div class="mb-3">
+                <label for="max_price" class="form-label">Höchstpreis</label>
+                <input type="number" name="max_price" id="max_price" class="form-control" value="{{ request.GET.max_price }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Filter anwenden</button>
+        </form>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-9">
+        <h2>Sortieren nach</h2>
+        <div class="mb-3">
+            <a href="?sort_by=price_asc" class="btn btn-outline-secondary">Preis aufsteigend</a>
+            <a href="?sort_by=price_desc" class="btn btn-outline-secondary">Preis absteigend</a>
+            <a href="?sort_by=popularity" class="btn btn-outline-secondary">Beliebtheit</a>
+        </div>
+
         <h2>Unsere Pizza</h2>
         <div class="list-group">
             {% for product in products %}
@@ -32,22 +47,4 @@
         </div>
     </div>
 </div>
-
-{% if recommendations %}
-    <h2>Empfehlungen für Sie</h2>
-    <div class="row">
-        {% for recommendation in recommendations %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ recommendation.product.name }}</h5>
-                        <p class="card-text">{{ recommendation.product.description }}</p>
-                        <p class="card-text">Preis: {{ recommendation.product.price }} €</p>
-                        <a href="{% url 'add_to_cart' recommendation.product.id %}" class="btn btn-primary">In den Warenkorb</a>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
 {% endblock %}
