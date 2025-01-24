@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .forms import OrderCreateForm, ProfileForm, CouponApplyForm
-from .models import Cart, OrderItem, Order, Coupon
-from .models import Product, Promotion, Profile
+from .forms import OrderCreateForm, ProfileForm, CouponApplyForm, ReviewForm
+from .models import Cart, OrderItem, Order, Coupon,Recommendation
+from .models import Product, Promotion, Profile, Review
 import stripe
 from django.conf import settings
 from django.urls import reverse
@@ -10,17 +10,34 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils import timezone
+from django.db.models import Count, Avg
+from django.core.cache import cache
+import logging
 
 
 
 
-# Create your views here.
 
+
+#представление главной страницы
 def home(request):
-    products = Product.objects.all()
-    promotions = Promotion.objects.filter(active=True)
-    return render(request, 'store/home.html', {'products': products, 'promotions': promotions}) #представление главной страницы
+    products = cache.get('products')
+    if not products:
+        products = Product.objects.all()
+        cache.set('products', products, 60 * 15)  # Кэшируем на 15 минут
 
+    promotions = Promotion.objects.filter(active=True)
+
+    recommendations = []
+    if request.user.is_authenticated:
+        recommendations = Recommendation.objects.filter(user=request.user).order_by('-score')[:5]
+        logger.info(f"Recommendations for {request.user.username}: {list(recommendations)}")  # Логирование
+
+    return render(request, 'store/home.html', {
+        'products': products,
+        'promotions': promotions,
+        'recommendations': recommendations,
+    })
 
 # Добавление товаров в корзину
 def add_to_cart(request, product_id):
@@ -188,6 +205,10 @@ def payment_success(request):
     order = Order.objects.get(id=order_id)
     order.paid = True
     order.save()
+
+    if order.user:
+        generate_recommendations(order.user)  # Проверьте, что эта строка есть
+
     send_order_email(order, 'emails/order_paid.html', 'Zahlungsbestätigung')
     return render(request, 'store/payment_success.html', {'order': order})
 
@@ -226,3 +247,47 @@ def coupon_apply(request):
         except Coupon.DoesNotExist:
             request.session['coupon_id'] = None
     return redirect('view_cart')
+
+
+# представление для добавления отзыва
+@login_required
+def add_review(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.product = product
+            review.user = request.user
+            review.save()
+            return redirect('product_detail', product_id=product.id)
+    else:
+        form = ReviewForm()
+    return render(request, 'store/add_review.html', {'form': form, 'product': product})
+
+
+# Отображение отзывов на странице товара
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    reviews = product.reviews.all()
+    return render(request, 'store/product_detail.html', {'product': product, 'reviews': reviews})
+
+
+# Генерация рекомендаций
+logger = logging.getLogger(__name__)
+
+def generate_recommendations(user):
+    # Получаем товары, которые пользователь уже покупал
+    purchased_products = OrderItem.objects.filter(order__user=user).values_list('product', flat=True)
+    logger.info(f"Purchased products: {list(purchased_products)}")
+
+    # Получаем товары с высоким рейтингом, которые пользователь еще не покупал
+    recommended_products = Product.objects.annotate(
+        avg_rating=Avg('reviews__rating'),
+        review_count=Count('reviews')
+    ).exclude(id__in=purchased_products).order_by('-avg_rating', '-review_count')[:5]
+    logger.info(f"Recommended products: {list(recommended_products)}")
+
+    # Сохраняем рекомендации
+    for product in recommended_products:
+        Recommendation.objects.create(user=user, product=product, score=product.avg_rating)

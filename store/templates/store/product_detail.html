@@ -1,0 +1,26 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<h1>{{ product.name }}</h1>
+<p>{{ product.description }}</p>
+<p>Preis: {{ product.price }} €</p>
+
+<a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary">In den Warenkorb</a>
+
+<h2>Bewertungen</h2>
+{% for review in reviews %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ review.user.username }}</h5>
+            <p class="card-text">{{ review.comment }}</p>
+            <p class="card-text">Bewertung: {{ review.rating }}/5</p>
+        </div>
+    </div>
+{% endfor %}
+
+{% if user.is_authenticated %}
+    <a href="{% url 'add_review' product.id %}" class="btn btn-primary">Bewertung hinzufügen</a>
+{% else %}
+    <p>Melden Sie sich an, um eine Bewertung abzugeben.</p>
+{% endif %}
+{% endblock %}

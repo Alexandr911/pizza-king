@@ -21,17 +21,33 @@
         <h2>Unsere Pizza</h2>
         <div class="list-group">
             {% for product in products %}
-                <a href="{% url 'add_to_cart' product.id %}" class="list-group-item list-group-item-action">
-                    <div itemscope itemtype="http://schema.org/Product">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1" itemprop="name">{{ product.name }}</h5>
-                            <small itemprop="price">{{ product.price }} €</small>
-                        </div>
-                        <p class="mb-1" itemprop="description">{{ product.description }}</p>
+                <a href="{% url 'product_detail' product.id %}" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ product.name }}</h5>
+                        <small>{{ product.price }} €</small>
                     </div>
+                    <p class="mb-1">{{ product.description }}</p>
                 </a>
             {% endfor %}
         </div>
     </div>
 </div>
+
+{% if recommendations %}
+    <h2>Empfehlungen für Sie</h2>
+    <div class="row">
+        {% for recommendation in recommendations %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ recommendation.product.name }}</h5>
+                        <p class="card-text">{{ recommendation.product.description }}</p>
+                        <p class="card-text">Preis: {{ recommendation.product.price }} €</p>
+                        <a href="{% url 'add_to_cart' recommendation.product.id %}" class="btn btn-primary">In den Warenkorb</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 {% endblock %}

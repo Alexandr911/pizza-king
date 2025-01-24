@@ -1,5 +1,5 @@
 from django import forms
-from .models import Order, Profile
+from .models import Order, Profile, Review
 
 # форма для оформления заказа
 class OrderCreateForm(forms.ModelForm):
@@ -18,3 +18,10 @@ class ProfileForm(forms.ModelForm):
 # форма для применения купона
 class CouponApplyForm(forms.Form):
     code = forms.CharField(label='Gutscheincode')
+
+
+# форма для отзывов
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']
