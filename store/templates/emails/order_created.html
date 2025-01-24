@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bestellbestätigung</title>
+</head>
+<body>
+    <h1>Vielen Dank für Ihre Bestellung!</h1>
+    <p>Ihre Bestellnummer ist <strong>{{ order.id }}</strong>.</p>
+    <p>Wir werden Ihre Bestellung so schnell wie möglich bearbeiten.</p>
+    <p>Gesamtbetrag: {{ order.get_total_cost }} €</p>
+    <p>Mit freundlichen Grüßen,<br>Pizza King</p>
+</body>
+</html>

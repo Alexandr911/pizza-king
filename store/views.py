@@ -6,6 +6,9 @@ from .models import Product, Promotion, Profile
 import stripe
 from django.conf import settings
 from django.urls import reverse
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 
 
@@ -67,7 +70,7 @@ def remove_from_cart(request, product_id):
     return redirect('view_cart')
 
 
-# представление для оформления заказа + оплата
+# представление для оформления заказа + оплата + отправка маил
 def create_order(request):
     if request.method == 'POST':
         form = OrderCreateForm(request.POST)
@@ -100,6 +103,7 @@ def create_order(request):
                 del request.session['cart']
 
             request.session['order_id'] = order.id
+            send_order_email(order, 'emails/order_created.html', 'Bestellbestätigung')
             return redirect('payment_process')
     else:
         form = OrderCreateForm()
@@ -170,7 +174,22 @@ def payment_success(request):
     order = Order.objects.get(id=order_id)
     order.paid = True
     order.save()
+    send_order_email(order, 'emails/order_paid.html', 'Zahlungsbestätigung')
     return render(request, 'store/payment_success.html', {'order': order})
+
 
 def payment_cancel(request):
     return render(request, 'store/payment_cancel.html')
+
+
+# функция для отправки email
+def send_order_email(order, template, subject):
+    html_message = render_to_string(template, {'order': order})
+    plain_message = strip_tags(html_message)
+    send_mail(
+        subject,
+        plain_message,
+        'noreply@pizza-king.com',  # Отправитель (можно указать любой email)
+        [order.email],             # Получатель (email заказчика)
+        html_message=html_message,
+    )

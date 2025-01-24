@@ -127,3 +127,12 @@ STATIC_URL = '/static/'
 
 STRIPE_PUBLIC_KEY = 'pk_test_51QkqVNFkhv6fec7skrJpoGvPZQ7ipxRKVQvohcc95plG1pJH4avmztZYCUfjWhn30cy9r0My2fH4E4gVQL15WDXq00SueLpfNM'
 STRIPE_SECRET_KEY = 'sk_test_51QkqVNFkhv6fec7sos9gLZDTPyd5qqp25Xaexidcuy5KlzrzYSA5FDyS4RFEmAtbSHItlnmSHAi98M0XJ2RWJQ6a004I6wNhmE'
+
+
+# Настройки для MailHog
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'  # MailHog работает на localhost
+EMAIL_PORT = 1025         # Порт по умолчанию для MailHog
+EMAIL_USE_TLS = False     # MailHog не использует TLS
+EMAIL_HOST_USER = ''      # Не требуется
+EMAIL_HOST_PASSWORD = ''  # Не требуется
