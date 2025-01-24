@@ -13,8 +13,10 @@
                 <h2>{{ product.name }}</h2>
                 <p>{{ product.description }}</p>
                 <p>Preis: {{ product.price }} €</p>
+                <a href="{% url 'add_to_cart' product.id %}">In den Warenkorb</a>
             </div>
         {% endfor %}
     </div>
-</body>
+<!-- Ссылка на корзину -->
+    <a href="{% url 'view_cart' %}">Warenkorb anzeigen</a></body>
 </html>
