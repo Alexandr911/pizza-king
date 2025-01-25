@@ -1,43 +1,39 @@
 {% extends 'store/base.html' %}
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bezahlvorgang</title>
-    <script src="https://js.stripe.com/v3/"></script>
-</head>
-<body>
+
+{% block content %}
+<div class="container mt-5">
     <h1>Bezahlvorgang</h1>
     <p>Gesamtbetrag: {{ order.get_total_cost }} €</p>
-    <button id="checkout-button">Jetzt bezahlen</button>
-    <script>
-        var stripe = Stripe('{{ stripe_public_key }}');
-        var checkoutButton = document.getElementById('checkout-button');
-        checkoutButton.addEventListener('click', function() {
-            fetch('/payment/process/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin',
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(session) {
-                return stripe.redirectToCheckout({ sessionId: session.id });
-            })
-            .then(function(result) {
-                if (result.error) {
-                    alert(result.error.message);
-                }
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-            });
+    <button id="checkout-button" class="btn btn-primary">Jetzt bezahlen</button>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    var stripe = Stripe('{{ stripe_public_key }}');
+    var checkoutButton = document.getElementById('checkout-button');
+    checkoutButton.addEventListener('click', function() {
+        fetch('/payment/process/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(session) {
+            return stripe.redirectToCheckout({ sessionId: session.id });
+        })
+        .then(function(result) {
+            if (result.error) {
+                alert(result.error.message);
+            }
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
         });
-    </script>
-</body>
-</html>
+    });
+</script>
+{% endblock %}

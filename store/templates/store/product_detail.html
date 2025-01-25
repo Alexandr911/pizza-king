@@ -1,42 +1,83 @@
 {% extends 'store/base.html' %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-6">
-        {% if product.image %}
-            <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
-        {% else %}
-            <img src="https://via.placeholder.com/400x300" class="img-fluid rounded" alt="Placeholder">
-        {% endif %}
-    </div>
-    <div class="col-md-6">
-        <h1>{{ product.name }}</h1>
-        <p class="lead">{{ product.description }}</p>
-        <p class="h3">Preis: {{ product.price }} €</p>
-
-        <div class="mt-4">
-            <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary btn-lg">In den Warenkorb</a>
-            <a href="{% url 'add_to_wishlist' product.id %}" class="btn btn-outline-secondary btn-lg">Zu meiner Wunschliste hinzufügen</a>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+            {% else %}
+                <img src="https://via.placeholder.com/400x300" class="img-fluid rounded" alt="Placeholder">
+            {% endif %}
         </div>
-    </div>
-</div>
+        <div class="col-md-6">
+            <h1 class="display-4">{{ product.name }}</h1>
+            <p class="lead">{{ product.description }}</p>
 
-<div class="mt-5">
-    <h2>Bewertungen</h2>
-    {% for review in reviews %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">{{ review.user.username }}</h5>
-                <p class="card-text">{{ review.comment }}</p>
-                <p class="card-text">Bewertung: {{ review.rating }}/5</p>
+            <div class="mb-4">
+                <h3>Состав</h3>
+                <p>{{ product.composition|default:"Состав не указан" }}</p>
+            </div>
+
+            <div class="mb-4">
+                <h3>Характеристики</h3>
+                <ul class="list-unstyled">
+                    {% if product.weight %}
+                        <li><strong>Вес:</strong> {{ product.weight }}</li>
+                    {% endif %}
+                    {% if product.size %}
+                        <li><strong>Размер:</strong> {{ product.size }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="mb-4">
+                <h3>Дополнительные ингредиенты</h3>
+                <form method="post" action="{% url 'add_to_cart' product.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {% for ingredient in product.ingredients.all %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="ingredients" value="{{ ingredient.id }}" id="ingredient{{ ingredient.id }}">
+                                <label class="form-check-label" for="ingredient{{ ingredient.id }}">
+                                    {{ ingredient.name }} (+{{ ingredient.price }} €)
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg">В корзину</button>
+                </form>
+            </div>
+
+            <div class="mb-4">
+                <h3>Цена</h3>
+                <p class="h2 text-danger">{{ product.price }} €</p>
+            </div>
+
+            <div class="d-grid gap-2">
+                <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary btn-lg">В корзину</a>
+                <a href="{% url 'add_to_wishlist' product.id %}" class="btn btn-outline-secondary btn-lg">В избранное</a>
             </div>
         </div>
-    {% endfor %}
+    </div>
 
-    {% if user.is_authenticated %}
-        <a href="{% url 'add_review' product.id %}" class="btn btn-primary">Bewertung hinzufügen</a>
-    {% else %}
-        <p>Melden Sie sich an, um eine Bewertung abzugeben.</p>
-    {% endif %}
+    <div class="mt-5">
+        <h2>Отзывы</h2>
+        {% for review in reviews %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ review.user.username }}</h5>
+                    <p class="card-text">{{ review.comment }}</p>
+                    <p class="card-text">Оценка: {{ review.rating }}/5</p>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+            <a href="{% url 'add_review' product.id %}" class="btn btn-primary">Добавить отзыв</a>
+        {% else %}
+            <p>Войдите, чтобы оставить отзыв.</p>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

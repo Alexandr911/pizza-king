@@ -3,6 +3,14 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
+# Дополнительные ингредиенты для товаров
+class Ingredient(models.Model):
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return self.name
+
 # Модель Product
 class Product(models.Model):
     name = models.CharField(max_length=255)
@@ -10,7 +18,10 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=100)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
-    meta_description = models.CharField(max_length=160, blank=True)
+    composition = models.TextField(blank=True, null=True)  # Состав продукта
+    weight = models.CharField(max_length=50, blank=True, null=True)  # Вес продукта
+    size = models.CharField(max_length=50, blank=True, null=True)  # Размер (например, для пиццы)
+    ingredients = models.ManyToManyField(Ingredient, blank=True)  # Связь с ингредиентами
 
     def __str__(self):
         return self.name
@@ -20,12 +31,14 @@ class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    ingredients = models.ManyToManyField(Ingredient, blank=True)
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
 
     def total_price(self):
-        return self.quantity * self.product.price
+        ingredient_price = sum(ingredient.price for ingredient in self.ingredients.all())
+        return (self.product.price + ingredient_price) * self.quantity
 
 
 # модели заказа
@@ -39,6 +52,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     paid = models.BooleanField(default=False)
+    status = models.CharField(max_length=50, default='Pending')  # Статус заказа
 
     def __str__(self):
         return f"Order {self.id}"
@@ -139,3 +153,4 @@ class ProductView(models.Model):
 
     def __str__(self):
         return f"{self.user.username if self.user else 'Anonymous'} viewed {self.product.name} at {self.viewed_at}"
+

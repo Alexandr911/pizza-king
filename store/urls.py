@@ -22,6 +22,6 @@ urlpatterns = [
     path('product/<int:product_id>/', views.product_detail, name='product_detail'),
     path('add_to_wishlist/<int:product_id>/', views.add_to_wishlist, name='add_to_wishlist'),#для add товара из избранного
     path('remove_from_wishlist/<int:product_id>/', views.remove_from_wishlist, name='remove_from_wishlist'), #для удаления товара из избранного
-
+    path('signup/', views.signup, name='signup'), #URL для регистрации
 
 ]

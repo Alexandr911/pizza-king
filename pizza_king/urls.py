@@ -19,6 +19,7 @@ from django.contrib.sitemaps.views import sitemap
 from store.sitemaps import ProductSitemap
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
 
 # маршрут для sitemap
 sitemaps = {
@@ -29,6 +30,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('store.urls')), #главной страницы
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'), #маршрут для выхода из системы
 ]
 
 

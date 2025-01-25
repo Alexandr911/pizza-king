@@ -1,7 +1,25 @@
 {% extends 'store/base.html' %}
 
 {% block content %}
+
+<!-- Слайдер -->
+<div class="container-fluid p-0 mb-4">
+    <div class="slick-slider">
+        <div>
+            <img src="https://via.placeholder.com/1200x400" class="img-fluid" alt="Slide 1">
+        </div>
+        <div>
+            <img src="https://via.placeholder.com/1200x400" class="img-fluid" alt="Slide 2">
+        </div>
+        <div>
+            <img src="https://via.placeholder.com/1200x400" class="img-fluid" alt="Slide 3">
+        </div>
+    </div>
+</div>
+
+<!-- Основной контент -->
 <div class="row">
+    <!-- Фильтры -->
     <div class="col-md-3">
         <h2>Filter</h2>
         <form method="get" action="{% url 'home' %}">
@@ -25,6 +43,8 @@
             <button type="submit" class="btn btn-primary">Filter anwenden</button>
         </form>
     </div>
+
+    <!-- Список продуктов -->
     <div class="col-md-9">
         <h2>Sortieren nach</h2>
         <div class="mb-3">
@@ -35,27 +55,95 @@
 
         <h2>Unsere Pizza</h2>
         <div class="list-group">
-    {% for product in products %}
-        <a href="{% url 'product_detail' product.id %}" class="list-group-item list-group-item-action">
-            <div class="row">
-                <div class="col-md-3">
-                    {% if product.image %}
-                        <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}" style="max-width: 100px;">
-                    {% else %}
-                        <img src="https://via.placeholder.com/100" class="img-fluid rounded" alt="Placeholder">
-                    {% endif %}
-                </div>
-                <div class="col-md-9">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{ product.name }}</h5>
-                        <small>{{ product.price }} €</small>
+            {% for product in products %}
+                <a href="{% url 'product_detail' product.id %}" class="list-group-item list-group-item-action">
+                    <div class="row">
+                        <div class="col-md-3">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}" style="max-width: 100px;">
+                            {% else %}
+                                <img src="https://via.placeholder.com/100" class="img-fluid rounded" alt="Placeholder">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ product.name }}</h5>
+                                <small>{{ product.price }} €</small>
+                            </div>
+                            <p class="mb-1">{{ product.description }}</p>
+                        </div>
                     </div>
-                    <p class="mb-1">{{ product.description }}</p>
-                </div>
-            </div>
-        </a>
-    {% endfor %}
-</div>
+                </a>
+            {% endfor %}
+        </div>
     </div>
 </div>
+
+<!-- Категории -->
+<div class="container mt-4">
+    <h2>Kategorien</h2>
+    <div class="row">
+        {% for category in categories %}
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ category }}</h5>
+                        <a href="{% url 'home' %}?category={{ category }}" class="btn btn-primary">Mehr anzeigen</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Популярные продукты -->
+<div class="container mt-4">
+    <h2>Beliebte Produkte</h2>
+    <div class="row">
+        {% for product in popular_products %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <p class="card-text">Preis: {{ product.price }} €</p>
+                        <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary">In den Warenkorb</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Информация о доставке -->
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lieferinformationen</h5>
+                    <p class="card-text">Wir liefern schnell und zuverlässig. Die Lieferzeit beträgt in der Regel 30-60 Minuten.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Подключение jQuery и Slick Slider -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css">
+<script>
+    $(document).ready(function(){
+        $('.slick-slider').slick({
+            dots: true,
+            infinite: true,
+            speed: 300,
+            slidesToShow: 1,
+            adaptiveHeight: true
+        });
+    });
+</script>
+
 {% endblock %}

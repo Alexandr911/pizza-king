@@ -14,12 +14,16 @@ from django.utils import timezone
 from django.db.models import Count, Avg, Q
 from django.core.cache import cache
 import logging
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.http import JsonResponse
+
 
 
 #представление главной страницы
 def home(request):
+    # Основной запрос для продуктов
     products = Product.objects.all()
-    promotions = Promotion.objects.filter(active=True)
 
     # Фильтрация по категории
     category = request.GET.get('category')
@@ -43,45 +47,69 @@ def home(request):
     elif sort_by == 'popularity':
         products = products.annotate(num_orders=Count('orderitem')).order_by('-num_orders')
 
+    # Активные промоакции
+    promotions = Promotion.objects.filter(active=True)
+
+    # Уникальные категории для фильтра
+    categories = Product.objects.values_list('category', flat=True).distinct()
+
+    # Популярные продукты (топ-6)
+    popular_products = Product.objects.annotate(num_orders=Count('orderitem')).order_by('-num_orders')[:6]
+
     return render(request, 'store/home.html', {
         'products': products,
         'promotions': promotions,
-        'categories': Product.objects.values_list('category', flat=True).distinct(),
+        'categories': categories,
+        'popular_products': popular_products,
     })
-
 # Добавление товаров в корзину
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
+    selected_ingredients = request.POST.getlist('ingredients')
+
     if request.user.is_authenticated:
         cart_item, created = Cart.objects.get_or_create(user=request.user, product=product)
         if not created:
             cart_item.quantity += 1
             cart_item.save()
+
+        # Добавляем выбранные ингредиенты
+        for ingredient_id in selected_ingredients:
+            ingredient = Ingredient.objects.get(id=ingredient_id)
+            cart_item.ingredients.add(ingredient)
     else:
         # Для неавторизованных пользователей используем сессии
         cart = request.session.get('cart', {})
-        cart[str(product_id)] = cart.get(str(product_id), 0) + 1
+        if str(product_id) in cart:
+            cart[str(product_id)]['quantity'] += 1
+        else:
+            cart[str(product_id)] = {'quantity': 1, 'ingredients': selected_ingredients}
         request.session['cart'] = cart
-    return redirect('home')
+
+    return redirect('view_cart')
 
 
  # представление для отображения корзины +  учета скидок
 def view_cart(request):
     if request.user.is_authenticated:
+        # Для авторизованных пользователей
         cart_items = Cart.objects.filter(user=request.user)
         total = sum(item.total_price() for item in cart_items)
     else:
+        # Для неавторизованных пользователей
         cart = request.session.get('cart', {})
         cart_items = []
         total = 0
-        for product_id, quantity in cart.items():
+        for product_id, item_data in cart.items():
             product = Product.objects.get(id=product_id)
+            quantity = item_data['quantity'] if isinstance(item_data, dict) else item_data
+            total_price = product.price * quantity
             cart_items.append({
                 'product': product,
                 'quantity': quantity,
-                'total_price': product.price * quantity,
+                'total_price': total_price,
             })
-            total += product.price * quantity
+            total += total_price
 
     coupon_id = request.session.get('coupon_id')
     coupon = None
@@ -110,19 +138,25 @@ def remove_from_cart(request, product_id):
             request.session['cart'] = cart
     return redirect('view_cart')
 
+logger = logging.getLogger(__name__)
 
 # представление для оформления заказа + оплата + отправка маил
 def create_order(request):
+    logger.info("Create order view called")
     if request.method == 'POST':
+        logger.info("POST request received")
         form = OrderCreateForm(request.POST)
         if form.is_valid():
+            logger.info("Form is valid")
             order = form.save(commit=False)
             if request.user.is_authenticated:
                 order.user = request.user
             order.save()
+            logger.info(f"Order created: {order.id}")
 
             if request.user.is_authenticated:
                 cart_items = Cart.objects.filter(user=request.user)
+                logger.info(f"Cart items: {cart_items.count()}")
                 for item in cart_items:
                     OrderItem.objects.create(
                         order=order,
@@ -133,6 +167,7 @@ def create_order(request):
                 cart_items.delete()
             else:
                 cart = request.session.get('cart', {})
+                logger.info(f"Session cart: {cart}")
                 for product_id, quantity in cart.items():
                     product = Product.objects.get(id=product_id)
                     OrderItem.objects.create(
@@ -144,8 +179,10 @@ def create_order(request):
                 del request.session['cart']
 
             request.session['order_id'] = order.id
-            send_order_email(order, 'emails/order_created.html', 'Bestellbestätigung')
+            logger.info("Redirecting to payment process")
             return redirect('payment_process')
+        else:
+            logger.error("Form is invalid")
     else:
         form = OrderCreateForm()
     return render(request, 'store/create_order.html', {'form': form})
@@ -156,9 +193,9 @@ def create_order(request):
 @login_required
 def profile(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
-    orders = Order.objects.filter(user=request.user)
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
     wishlist = Wishlist.objects.filter(user=request.user)
-    viewed_products = ProductView.objects.filter(user=request.user).order_by('-viewed_at')[:10]  # Последние 10 просмотров
+    viewed_products = ProductView.objects.filter(user=request.user).order_by('-viewed_at')[:10]
     return render(request, 'store/profile.html', {
         'profile': profile,
         'orders': orders,
@@ -211,10 +248,9 @@ def payment_process(request):
             'cancel_url': cancel_url,
         }
         session = stripe.checkout.Session.create(**session_data)
-        return redirect(session.url, code=303)
+        return JsonResponse({'id': session.id})  # Возвращаем session.id
     else:
         return render(request, 'store/payment_process.html', {'order': order, 'stripe_public_key': settings.STRIPE_PUBLIC_KEY})
-
 
 # представления для успешного и отмененного платежа
 def payment_success(request):
@@ -222,12 +258,18 @@ def payment_success(request):
     order = Order.objects.get(id=order_id)
     order.paid = True
     order.save()
-
-    if order.user:
-        generate_recommendations(order.user)  # Проверьте, что эта строка есть
-
-    send_order_email(order, 'emails/order_paid.html', 'Zahlungsbestätigung')
     return render(request, 'store/payment_success.html', {'order': order})
+# def payment_success(request):
+#     order_id = request.session.get('order_id')
+#     order = Order.objects.get(id=order_id)
+#     order.paid = True
+#     order.save()
+#
+#     if order.user:
+#         generate_recommendations(order.user)  # Проверьте, что эта строка есть
+#
+#     send_order_email(order, 'emails/order_paid.html', 'Zahlungsbestätigung')
+#     return render(request, 'store/payment_success.html', {'order': order})
 
 
 def payment_cancel(request):
@@ -340,3 +382,16 @@ def product_detail(request, product_id):
         'product': product,
         'reviews': reviews,
     })
+
+# Создание представления для регистрации
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'store/signup.html', {'form': form})
+

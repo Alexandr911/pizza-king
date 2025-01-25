@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Product, Cart, Order, OrderItem
-from .models import Profile, Promotion
+from .models import Profile, Promotion, Ingredient
 from django.utils.html import format_html
 
 # модели для администрирования
@@ -17,6 +17,12 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ['paid', 'created_at', 'updated_at']
     inlines = [OrderItemInline]
 
+
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ['name', 'price']
+    search_fields = ['name']
+
 # Настройки для отображения модели Product в админке
 # изображений через административную панель
 @admin.register(Product)
@@ -24,6 +30,11 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ['name', 'price', 'category', 'display_image']
     list_filter = ['category']
     search_fields = ['name', 'description']
+    filter_horizontal = ['ingredients']  # Удобный выбор ингредиентов
+    fieldsets = [
+        (None, {'fields': ['name', 'description', 'price', 'category']}),
+        ('Details', {'fields': ['image', 'composition', 'weight', 'size']}),
+    ]
 
     def display_image(self, obj):
         if obj.image:

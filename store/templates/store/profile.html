@@ -1,20 +1,74 @@
 {% extends 'store/base.html' %}
 
 {% block content %}
-<h1>Mein Profil</h1>
-<p>Telefon: {{ profile.phone }}</p>
-<p>Adresse: {{ profile.address }}</p>
-<a href="{% url 'edit_profile' %}" class="btn btn-primary">Profil bearbeiten</a>
+<div class="container mt-5">
+    <h1>Mein Profil</h1>
+    <p>Telefon: {{ profile.phone }}</p>
+    <p>Adresse: {{ profile.address }}</p>
+    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Profil bearbeiten</a>
 
-<h2>Meine Bestellungen</h2>
-<ul>
-    {% for order in orders %}
-        <li>
-            <a href="{% url 'order_detail' order.id %}">Bestellung #{{ order.id }}</a>
-            - {{ order.created_at }}
-        </li>
-    {% endfor %}
-</ul>
+    <h2>Meine Bestellungen</h2>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Bestellnummer</th>
+                    <th>Datum</th>
+                    <th>Gesamtbetrag</th>
+                    <th>Status</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.created_at }}</td>
+                        <td>{{ order.get_total_cost }} €</td>
+                        <td>{{ order.status }}</td>
+                        <td>
+                            <a href="{% url 'order_detail' order.id %}" class="btn btn-info btn-sm">Details</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Meine Wunschliste</h2>
+    <div class="row">
+        {% for item in wishlist %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.product.name }}</h5>
+                        <p class="card-text">{{ item.product.description }}</p>
+                        <p class="card-text">Preis: {{ item.product.price }} €</p>
+                        <a href="{% url 'add_to_cart' item.product.id %}" class="btn btn-primary">In den Warenkorb</a>
+                        <a href="{% url 'remove_from_wishlist' item.product.id %}" class="btn btn-danger">Entfernen</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Zuletzt angesehene Produkte</h2>
+    <div class="row">
+        {% for view in viewed_products %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ view.product.name }}</h5>
+                        <p class="card-text">{{ view.product.description }}</p>
+                        <p class="card-text">Preis: {{ view.product.price }} €</p>
+                        <a href="{% url 'product_detail' view.product.id %}" class="btn btn-primary">Details anzeigen</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
 
 <h2>Meine Wunschliste</h2>
 <div class="row">
@@ -48,4 +102,3 @@
         </div>
     {% endfor %}
 </div>
-{% endblock %}

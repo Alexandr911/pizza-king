@@ -1,29 +1,31 @@
 {% extends 'store/base.html' %}
 
 {% block content %}
-<h1>Bestellung aufgeben</h1>
-<form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-        {{ form.first_name.label_tag }}
-        {{ form.first_name }}
-    </div>
-    <div class="mb-3">
-        {{ form.last_name.label_tag }}
-        {{ form.last_name }}
-    </div>
-    <div class="mb-3">
-        {{ form.email.label_tag }}
-        {{ form.email }}
-    </div>
-    <div class="mb-3">
-        {{ form.address.label_tag }}
-        {{ form.address }}
-    </div>
-    <div class="mb-3">
-        {{ form.phone.label_tag }}
-        {{ form.phone }}
-    </div>
-    <button type="submit" class="btn btn-primary">Bestellung abschicken</button>
-</form>
+<div class="container mt-5">
+    <h1>Bestellung aufgeben</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.first_name.label_tag }}
+            {{ form.first_name }}
+        </div>
+        <div class="mb-3">
+            {{ form.last_name.label_tag }}
+            {{ form.last_name }}
+        </div>
+        <div class="mb-3">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+        </div>
+        <div class="mb-3">
+            {{ form.address.label_tag }}
+            {{ form.address }}
+        </div>
+        <div class="mb-3">
+            {{ form.phone.label_tag }}
+            {{ form.phone }}
+        </div>
+        <button type="submit" class="btn btn-primary">Bestellung abschicken</button>
+    </form>
+</div>
 {% endblock %}
