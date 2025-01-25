@@ -1,3 +1,125 @@
+/* Общие стили */
+body {
+    padding-top: 80px; /* Отступ для фиксированной панели */
+}
+
+/* Фиксированная панель категорий */
+.categories-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    z-index: 1000;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.categories-panel .row {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.categories-panel .col-md-1 {
+    flex: 0 0 auto;
+    text-align: center;
+}
+
+.categories-panel img {
+    width: 30px;
+    height: 30px;
+}
+
+.categories-panel p {
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Слайдер */
+.slick-slider {
+    height: 600px;
+    margin-bottom: 30px;
+}
+
+.slick-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slide-content {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Карточки */
+.card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-body {
+    flex: 1;
+    padding: 20px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.card-text {
+    font-size: 1rem;
+    color: #555;
+}
+
+.info-card {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-card h5 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.info-card p {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.info-card strong {
+    color: #dc3545; /* Красный цвет для акцента */
+}
+
+/* Продукты */
 .product-image {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -9,30 +131,29 @@
     border-radius: 10px;
 }
 
+/* Кнопки */
 .btn-lg {
     font-size: 1.2rem;
     padding: 10px 20px;
 }
 
-.slick-slider {
-    margin-bottom: 30px;
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
 }
 
-.slick-slide img {
-    width: 100%;
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
 }
 
-.card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
+/* Адаптивность */
+@media (max-width: 768px) {
+    .categories-panel .col-md-1 {
+        flex: 0 0 25%;
+    }
 
-.card-img-top {
-    height: 200px;
-    object-fit: cover;
-}
-
-.card-body {
-    flex: 1;
+    .slick-slider {
+        height: 400px;
+    }
 }

@@ -2,7 +2,106 @@
 
 {% block content %}
 
+<!-- Фиксированная панель категорий -->
+<div class="categories-panel" style="position: fixed; top: 0; left: 0; width: 100%; background: white; z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+    <div class="container">
+        <div class="row">
+            {% for category in categories %}
+                <div class="col-md-1 text-center">
+                    <a href="{{ category.link }}" style="text-decoration: none; color: inherit;">
+                        <img src="{{ category.icon.url }}" alt="{{ category.name }}" style="width: 30px; height: 30px;">
+                        <p style="font-size: 12px; margin-top: 5px;">{{ category.name }}</p>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Разделение страницы на две части -->
+<div class="container-fluid mt-4" style="margin-top: 80px;"> <!-- Отступ для фиксированной панели -->
+    <div class="row">
+        <!-- Левая часть: Слайдер (увеличенный размер) -->
+        <div class="col-md-6">
+            <div class="slick-slider" style="height: 600px;"> <!-- Увеличенная высота слайдера -->
+                {% for slide in slides %}
+                    <div>
+                        <img src="{{ slide.image.url }}" class="img-fluid" alt="{{ slide.title }}" style="height: 100%; object-fit: cover;">
+                        <div class="slide-content">
+                            <h3>{{ slide.title }}</h3>
+                            <p>{{ slide.description }}</p>
+                            {% if slide.link %}
+                                <a href="{{ slide.link }}" class="btn btn-primary">Mehr erfahren</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Правая часть: Карточки (уменьшенный размер) -->
+        <div class="col-md-6">
+            <div class="row">
+                <!-- Карточка 1: WORK SCHEDULE -->
+                <div class="col-md-12 mb-2">
+                    <div class="card info-card h-100" style="height: 120px;">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center">
+                                <div class="text-center me-3">
+                                    <i class="fas fa-clock fa-2x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1" style="font-size: 1rem;">WORK SCHEDULE 10:00 - 21:00</h5>
+                                    <p class="card-text mb-0" style="font-size: 0.8rem;">During the period of martial law</p>
+                                    <p class="card-text mb-0" style="font-size: 0.8rem;"><strong>No late arrivals</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 2: EXACT DELIVERY TIME -->
+                <div class="col-md-12 mb-2">
+                    <div class="card info-card h-100" style="height: 120px;">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center">
+                                <div class="text-center me-3">
+                                    <i class="fas fa-truck fa-2x text-success"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1" style="font-size: 1rem;">EXACT DELIVERY TIME</h5>
+                                    <p class="card-text mb-0" style="font-size: 0.8rem;">If you are more than 9 minutes late, we will give you a promotional code for UAH 150.</p>
+                                    <p class="card-text mb-0" style="font-size: 0.8rem;"><strong>Due to the shelling, the event in Kharkiv has been temporarily suspended.</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 3: ORDER TRACKING -->
+                <div class="col-md-12 mb-2">
+                    <div class="card info-card h-100" style="height: 120px;">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center">
+                                <div class="text-center me-3">
+                                    <i class="fas fa-map-marker-alt fa-2x text-warning"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1" style="font-size: 1rem;">ORDER TRACKING</h5>
+                                    <p class="card-text mb-0" style="font-size: 0.8rem;">Full control over your order status.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Основной контент -->
 <div class="row">
+    <!-- Фильтры -->
     <div class="col-md-3">
         <h2>Filter</h2>
         <form method="get" action="{% url 'home' %}">
@@ -11,7 +110,7 @@
                 <select name="category" id="category" class="form-select">
                     <option value="">Alle Kategorien</option>
                     {% for category in categories %}
-                        <option value="{{ category }}" {% if category == request.GET.category %}selected{% endif %}>{{ category }}</option>
+                        <option value="{{ category.name }}" {% if category.name == request.GET.category %}selected{% endif %}>{{ category.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -24,8 +123,11 @@
                 <input type="number" name="max_price" id="max_price" class="form-control" value="{{ request.GET.max_price }}">
             </div>
             <button type="submit" class="btn btn-primary">Filter anwenden</button>
+            <a href="{% url 'home' %}" class="btn btn-secondary">Filter zurücksetzen</a>
         </form>
     </div>
+
+    <!-- Список продуктов -->
     <div class="col-md-9">
         <h2>Sortieren nach</h2>
         <div class="mb-3">
@@ -59,4 +161,89 @@
         </div>
     </div>
 </div>
+
+<!-- Категории -->
+<div class="container mt-4">
+    <h2>Kategorien</h2>
+    <div class="row">
+        {% for category in categories %}
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <a href="{% url 'home' %}?category={{ category.name }}" class="btn btn-primary">Mehr anzeigen</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Популярные продукты -->
+<div class="container mt-4">
+    <h2>Beliebte Produkte</h2>
+    <div class="row">
+        {% for product in popular_products %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <p class="card-text">Preis: {{ product.price }} €</p>
+                        <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary">In den Warenkorb</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Информация о доставке -->
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lieferinformationen</h5>
+                    <p class="card-text">Wir liefern schnell und zuverlässig. Die Lieferzeit beträgt in der Regel 30-60 Minuten.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Подключение jQuery и Slick Slider -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css">
+
+<!-- Подключение Font Awesome для иконок -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+    $(document).ready(function(){
+        $('.slick-slider').slick({
+            dots: true,  // Включаем точки
+            arrows: true,        // Включаем стрелки
+            infinite: true,
+            speed: 300,
+            slidesToShow: 1,
+            adaptiveHeight: true
+        });
+
+        // Горизонтальная прокрутка для категорий
+        const categoriesPanel = document.querySelector('.categories-panel .row');
+        if (categoriesPanel) {
+            categoriesPanel.addEventListener('wheel', function(event) {
+                event.preventDefault();
+                categoriesPanel.scrollBy({
+                    left: event.deltaY < 0 ? -30 : 30,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    });
+</script>
+
 {% endblock %}

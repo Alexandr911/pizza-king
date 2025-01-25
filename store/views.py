@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import OrderCreateForm, ProfileForm, CouponApplyForm, ReviewForm
 from .models import Cart, OrderItem, Order, Coupon,Recommendation
 from .models import Product, Promotion, Profile
-from .models import Review, Wishlist, ProductView
+from .models import Review, Wishlist, ProductView, Slide
 import stripe
 from django.conf import settings
 from django.urls import reverse
@@ -22,6 +22,9 @@ from django.http import JsonResponse
 
 #представление главной страницы
 def home(request):
+    # Получаем активные слайды, отсортированные по полю order
+    slides = Slide.objects.filter(is_active=True).order_by('order')
+
     # Основной запрос для продуктов
     products = Product.objects.all()
 
@@ -56,12 +59,16 @@ def home(request):
     # Популярные продукты (топ-6)
     popular_products = Product.objects.annotate(num_orders=Count('orderitem')).order_by('-num_orders')[:6]
 
+    # Передаем все данные в шаблон
     return render(request, 'store/home.html', {
+        'slides': slides,  # Добавляем слайды в контекст
         'products': products,
         'promotions': promotions,
         'categories': categories,
         'popular_products': popular_products,
     })
+
+
 # Добавление товаров в корзину
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -394,4 +401,6 @@ def signup(request):
     else:
         form = UserCreationForm()
     return render(request, 'store/signup.html', {'form': form})
+
+
 
